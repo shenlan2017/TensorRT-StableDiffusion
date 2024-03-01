@@ -142,5 +142,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 models/
+onnx/
+engine/
 bird*
 *.log
