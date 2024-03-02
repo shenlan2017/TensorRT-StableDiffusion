@@ -143,5 +143,5 @@ dmypy.json
 .pyre/
 onnx/
 engine/
-bird*
 *.log
+/*.jpg
