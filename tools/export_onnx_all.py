@@ -117,7 +117,7 @@ def export_clip_model():
 
 
 def export_control_net_model():
-    control_net = hk.model.control_model
+    control_net = hk.model.control_model.cpu()
 
     x_noisy = torch.randn(1, 4, 32, 48, dtype=torch.float32)
     hint = torch.randn(1, 3, 256, 384, dtype=torch.float32)
@@ -133,7 +133,7 @@ def export_control_net_model():
     # if onnx model is exist, not export
     if not os.path.exists(onnx_path):
         torch.onnx.export(
-            control_net.cpu(),
+            control_net,
             (x_noisy, hint, timestep, context),
             onnx_path,
             verbose=True,
@@ -144,6 +144,7 @@ def export_control_net_model():
             keep_initializers_as_inputs=True
         )
 
+    # import pdb; pdb.set_trace()
     outputs = control_net(x_noisy, hint, timestep, context)
 
     input_dicts = {"x_noisy": x_noisy.numpy(), "hint": hint.numpy(), "timestep": timestep.numpy(), "context": context.numpy()}
@@ -245,9 +246,9 @@ def export_decoder_model():
 
 def main():
     export_clip_model()
-    # export_control_net_model()
-    # export_controlled_unet_model()
-    # export_decoder_model()
+    export_control_net_model()
+    export_controlled_unet_model()
+    export_decoder_model()
 
 if __name__ == '__main__':
     main()
