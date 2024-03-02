@@ -89,22 +89,18 @@ def export_clip_model():
     tokens = torch.zeros(1, 77, dtype=torch.int32)
     input_names = ["input_ids"]
     output_names = ["last_hidden_state"]
-    dynamic_axes = {"input_ids": {1: "S"}, "last_hidden_state": {1: "S"}}
 
-    # if onnx model is exist, not export
-    if not os.path.exists(onnx_path):
-        torch.onnx.export(
-            clip_model,
-            (tokens),
-            onnx_path,
-            verbose=True,
-            opset_version=18,
-            do_constant_folding=True,
-            input_names=input_names,
-            output_names=output_names,
-            dynamic_axes=dynamic_axes,
-        )
-        print("======================= CLIP model export onnx done!")
+    torch.onnx.export(
+        clip_model,
+        (tokens),
+        onnx_path,
+        verbose=True,
+        opset_version=18,
+        do_constant_folding=True,
+        input_names=input_names,
+        output_names=output_names,
+    )
+    print("======================= CLIP model export onnx done!")
 
     # verify onnx model
     output = clip_model(tokens)
@@ -126,23 +122,19 @@ def export_control_net_model():
 
     input_names = ["x_noisy", "hint", "timestep", "context"]
     output_names = ["latent"]
-    dynamic_axes = {"context": {1: "S"}}
 
     onnx_path = "./onnx/ControlNet.onnx"
 
-    # if onnx model is exist, not export
-    if not os.path.exists(onnx_path):
-        torch.onnx.export(
-            control_net,
-            (x_noisy, hint, timestep, context),
-            onnx_path,
-            verbose=True,
-            opset_version=18,
-            do_constant_folding=True,
-            input_names=input_names,
-            dynamic_axes=dynamic_axes,
-            keep_initializers_as_inputs=True
-        )
+    torch.onnx.export(
+        control_net,
+        (x_noisy, hint, timestep, context),
+        onnx_path,
+        verbose=True,
+        opset_version=18,
+        do_constant_folding=True,
+        input_names=input_names,
+        keep_initializers_as_inputs=True
+    )
 
     # import pdb; pdb.set_trace()
     outputs = control_net(x_noisy, hint, timestep, context)
@@ -180,25 +172,21 @@ def export_controlled_unet_model():
         input_names.append("control" + str(i))
 
     output_names = ["latent"]
-    dynamic_axes = {"context": {1: "S"}}
 
     onnx_path = "./onnx/ControlledUnet"
     os.makedirs(onnx_path, exist_ok=True)
     onnx_path = onnx_path + "/ControlledUnet.onnx"
 
-    # if onnx model is exist, not export
-    if not os.path.exists(onnx_path):
-        torch.onnx.export(
-            controlled_unet_mdoel,
-            (x_noisy, timestep, context, control_list),
-            onnx_path,
-            verbose=True,
-            opset_version=18,
-            do_constant_folding=True,
-            input_names=input_names,
-            # output_names=output_names,
-            dynamic_axes=dynamic_axes,
-        )
+    torch.onnx.export(
+        controlled_unet_mdoel,
+        (x_noisy, timestep, context, control_list),
+        onnx_path,
+        verbose=True,
+        opset_version=18,
+        do_constant_folding=True,
+        input_names=input_names,
+        # output_names=output_names,
+    )
 
     # verify onnx model
     input_dicts = {"x_noisy": x_noisy.numpy(), "timestep": timestep.numpy(), "context": context.numpy()}
@@ -221,25 +209,22 @@ def export_decoder_model():
 
     input_names = ["latent"]
     output_names = ["images"]
-    # dynamic_axes = {"context": {1: "S"}}
 
     onnx_path = "./onnx/Decoder.onnx"
 
     # import pdb; pdb.set_trace()
     ret = decode_model(latent)
 
-    # if onnx model is exist, not export
-    if not os.path.exists(onnx_path):
-        torch.onnx.export(
-            decode_model.cpu(),
-            (latent),
-            onnx_path,
-            verbose=True,
-            opset_version=18,
-            do_constant_folding=True,
-            input_names=input_names,
-            keep_initializers_as_inputs=True
-        )
+    torch.onnx.export(
+        decode_model.cpu(),
+        (latent),
+        onnx_path,
+        verbose=True,
+        opset_version=18,
+        do_constant_folding=True,
+        input_names=input_names,
+        keep_initializers_as_inputs=True
+    )
 
     input_dicts = {"latent": latent.numpy()}
     onnxruntime_check(onnx_path, input_dicts, [ret])

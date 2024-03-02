@@ -91,20 +91,18 @@ def export_clip_model():
     output_names = ["last_hidden_state"]
     dynamic_axes = {"input_ids": {1: "S"}, "last_hidden_state": {1: "S"}}
 
-    # if onnx model is exist, not export
-    if not os.path.exists(onnx_path):
-        torch.onnx.export(
-            clip_model,
-            (tokens),
-            onnx_path,
-            verbose=True,
-            opset_version=18,
-            do_constant_folding=True,
-            input_names=input_names,
-            output_names=output_names,
-            dynamic_axes=dynamic_axes,
-        )
-        print("======================= CLIP model export onnx done!")
+    torch.onnx.export(
+        clip_model,
+        (tokens),
+        onnx_path,
+        verbose=True,
+        opset_version=18,
+        do_constant_folding=True,
+        input_names=input_names,
+        output_names=output_names,
+        dynamic_axes=dynamic_axes,
+    )
+    print("======================= CLIP model export onnx done!")
 
     # verify onnx model
     output = clip_model(tokens)
