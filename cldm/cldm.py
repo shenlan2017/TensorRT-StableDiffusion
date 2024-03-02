@@ -313,7 +313,7 @@ class ControlLDM(LatentDiffusion):
         self.only_mid_control = only_mid_control
         self.control_scales = [1.0] * 13
         self.controlnet_trt = False
-        controlnet_engine_path = "./engine/ControlNet.plan"
+        controlnet_engine_path = "./engine/ControlNet.engine"
         if not os.path.exists(controlnet_engine_path):
             self.controlnet_trt = False
         if self.controlnet_trt:
@@ -325,11 +325,12 @@ class ControlLDM(LatentDiffusion):
             self.controlnet_engine.allocate_buffers(controlnet_shape_dict)
             print("engine context load")
             self.controlnet_engine.get_engine_infor()
-        self.controlunet_trt = True
-        unet_engine_path = "./engine/ControlledUnet.plan"
+        self.controlunet_trt = False
+        unet_engine_path = "./engine/ControlledUnet.engine"
         if not os.path.exists(unet_engine_path):
             self.controlunet_trt = False
         if self.controlunet_trt:
+            unet_engine_path = "./engine/ControlledUnet.engine"
             self.unet_engine = Engine(unet_engine_path)
             self.unet_engine.load()
             print("engine {} load".format(unet_engine_path))
@@ -358,12 +359,12 @@ class ControlLDM(LatentDiffusion):
         if cond['c_concat'] is None:
             eps = diffusion_model(x=x_noisy, timesteps=t, context=cond_txt, control=None, only_mid_control=self.only_mid_control)
         else:
-            # import pdb; pdb.set_trace()
+            import pdb
+            #pdb.set_trace()
             if self.controlnet_trt:
                 #pdb.set_trace()
                 hint = torch.cat(cond['c_concat'], 1)
-                control_trt = self.controlnet_engine.infer({"x_noisy":x_noisy, "hint":hint,
-                                                            "timestep":t, "context":cond_txt})
+                control_trt = self.controlnet_engine.infer({"x_noisy":x_noisy, "hint":hint, "timestep":t, "context":cond_txt})
                 key_list = list(control_trt.keys())[4:]
                 control_trt_list = [control_trt[key] for key in key_list]
                 #pdb.set_trace()
@@ -371,18 +372,16 @@ class ControlLDM(LatentDiffusion):
             else:
                 control = self.control_model(x=x_noisy, hint=torch.cat(cond['c_concat'], 1), timesteps=t, context=cond_txt)
                 control = [c * scale for c, scale in zip(control, self.control_scales)]
-
+            
             #eps_trt = self.unet_engine()
             if self.controlunet_trt:
                 #pdb.set_trace()
-                input_dict = {'x': x_noisy, 'timesteps': t, 'context': cond_txt,
-                              'control0': control[0], 'control1': control[1], 'control2': control[2],
-                              'control3': control[3], 'control4': control[4], 'control5': control[5],
-                              'control6': control[6], 'control7': control[7], 'control8': control[8],
-                              'control9': control[9], 'control10': control[10], 'control11': control[11],
-                              'control12': control[12]}
+                input_dict = {'x': x_noisy, 'timesteps': t, 'context': cond_txt, 'control': control[0], 'onnx::Add_4': control[1], 
+              'onnx::Add_5': control[2], 'onnx::Add_6': control[3], 'onnx::Add_7': control[4], 'onnx::Add_8': control[5], 
+              'onnx::Add_9': control[6], 'onnx::Add_10': control[7], 'onnx::Add_11': control[8], 'onnx::Add_12': control[9], 
+              'onnx::Add_13': control[10], 'onnx::Add_14': control[11], 'onnx::Add_15': control[12]}
                 eps_trt = self.unet_engine.infer(input_dict)['latent'].clone()
-
+                
                 return eps_trt
             else:
                 eps = diffusion_model(x=x_noisy, timesteps=t, context=cond_txt, control=control, only_mid_control=self.only_mid_control)

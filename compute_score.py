@@ -17,13 +17,13 @@ def PD(base_img, new_img):
     return pd_value
 
 def get_score(t, p):
-    tFactor = 0
-    if t < 520 and t > 0:
-        tFactor = 20000 - 28.8462 * t
-    elif t >=520 and t < 2600:
-        tFactor = 5000 - 2.40385 * (t - 520)
-    else:
-        tFactor = 0
+    tFactor = 7000 / t
+    # if t < 520 and t > 0:
+        # tFactor = 20000 - 28.8462 * t
+    # elif t >=520 and t < 2600:
+        # tFactor = 5000 - 2.40385 * (t - 520)
+    # else:
+        # tFactor = 0
 
     pdFactor = 0
     if p < 4 and p >= 0:
