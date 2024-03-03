@@ -141,7 +141,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-onnx/
-engine/
+onnx/*
+engine/*
 *.log
 /*.jpg
