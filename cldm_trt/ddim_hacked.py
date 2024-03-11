@@ -8,6 +8,7 @@ from Engine import Engine
 from polygraphy import cuda
 from ldm.modules.diffusionmodules.util import make_ddim_sampling_parameters, make_ddim_timesteps, noise_like, extract_into_tensor
 
+import time
 
 class DDIMSampler(object):
     def __init__(self, model, schedule="linear", **kwargs):
@@ -108,6 +109,8 @@ class DDIMSampler(object):
                ucg_schedule=None,
                **kwargs
                ):
+
+        self.make_schedule(ddim_num_steps=S, ddim_eta=eta, verbose=verbose)
         # sampling
         C, H, W = shape
         device = torch.device("cuda")
@@ -123,6 +126,7 @@ class DDIMSampler(object):
             index = total_steps - i - 1
             ts = torch.full((batch_size,), step, device=device, dtype=torch.long)
 
+            # import pdb; pdb.set_trace()
             # conditioning
             if self.controlnet_trt and self.controlunet_trt:
                 hint = torch.cat(conditioning['c_concat'], 1)
@@ -130,13 +134,24 @@ class DDIMSampler(object):
                 #if self.cuda_graph_instance is None:
                    #cudart.cudaStreamBeginCapture(self.stream1.ptr, cudart.cudaStreamCaptureMode.cudaStreamCaptureModeGlobal)
 
+                torch.cuda.synchronize()
+                start_time = time.time()
                 control_trt_dict = self.controlnet_engine.infer({"x_noisy":img, "hint":hint, "timestep":ts, "context":cond_txt}, stream = self.stream1, use_cuda_graph=True)
+                torch.cuda.synchronize()
+                end_time = time.time()
+                # print(f"controlnet_engine time={(end_time-start_time)*1000}ms")
                 control = list(control_trt_dict.values())
-                input_dict = {'x': img, 'timesteps': ts, 'context': cond_txt, 'control': control[4], 'onnx::Add_4': control[5],
-              'onnx::Add_5': control[6], 'onnx::Add_6': control[7], 'onnx::Add_7': control[8], 'onnx::Add_8': control[9],
-              'onnx::Add_9': control[10], 'onnx::Add_10': control[11], 'onnx::Add_11': control[12], 'onnx::Add_12': control[13],
-              'onnx::Add_13': control[14], 'onnx::Add_14': control[15], 'onnx::Add_15': control[16]}
+                input_dict = {'x_noisy': img, 'timestep': ts, 'context': cond_txt,
+                              'control0': control[4], 'control1': control[5], 'control2': control[6], 'control3': control[7],
+                              'control4': control[8], 'control5': control[9], 'control6': control[10], 'control7': control[11],
+                              'control8': control[12], 'control9': control[13], 'control10': control[14], 'control11': control[15],
+                              'control12': control[16]}
+                torch.cuda.synchronize()
+                start_time = time.time()
                 model_t = self.unet_engine.infer(input_dict, self.stream1, use_cuda_graph=True)['latent'].clone()
+                torch.cuda.synchronize()
+                end_time = time.time()
+                # print(f"unet_engine time={(end_time-start_time)*1000}ms")
             else:
                 model_t = self.model.apply_model(img, ts, conditioning)
             # unconditional_conditioning
@@ -145,10 +160,11 @@ class DDIMSampler(object):
                 cond_txt = torch.cat(unconditional_conditioning['c_crossattn'], 1)
                 control_trt_dict = self.controlnet_engine.infer({"x_noisy":img, "hint":hint, "timestep":ts, "context":cond_txt}, stream = self.stream2, use_cuda_graph=True)
                 control = list(control_trt_dict.values())
-                input_dict = {'x': img, 'timesteps': ts, 'context': cond_txt, 'control': control[4], 'onnx::Add_4': control[5],
-              'onnx::Add_5': control[6], 'onnx::Add_6': control[7], 'onnx::Add_7': control[8], 'onnx::Add_8': control[9],
-              'onnx::Add_9': control[10], 'onnx::Add_10': control[11], 'onnx::Add_11': control[12], 'onnx::Add_12': control[13],
-              'onnx::Add_13': control[14], 'onnx::Add_14': control[15], 'onnx::Add_15': control[16]}
+                input_dict = {'x_noisy': img, 'timestep': ts, 'context': cond_txt,
+                              'control0': control[4], 'control1': control[5], 'control2': control[6], 'control3': control[7],
+                              'control4': control[8], 'control5': control[9], 'control6': control[10], 'control7': control[11],
+                              'control8': control[12], 'control9': control[13], 'control10': control[14], 'control11': control[15],
+                              'control12': control[16]}
                 model_uncond = self.unet_engine.infer(input_dict, stream = self.stream2, use_cuda_graph=True)['latent'].clone()
             else:
                 model_uncond = self.model.apply_model(img, ts, unconditional_conditioning)

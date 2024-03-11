@@ -65,7 +65,7 @@ def export_clip_model():
     onnx_path = "./onnx/CLIP.onnx"
     plan_path = "./engine/CLIP.plan"
 
-    onnx2trt(onnx_path, plan_path, [(1, 1)], [(1, 77)], [(1, 128)])
+    onnx2trt(onnx_path, plan_path, [(1, 77)], [(1, 77)], [(1, 77)])
 
     # onnx2trt(onnx_path, plan_path, [(1, 1)], [(1, 77)], [(1, 128)], use_fp16=True)
     print("======================= CLIP onnx2trt done!")
@@ -141,9 +141,9 @@ def export_decoder_model():
 
 def main():
     export_clip_model()
-    export_control_net_model()
-    export_controlled_unet_model()
-    export_decoder_model()
+    # export_control_net_model()
+    # export_controlled_unet_model()
+    # export_decoder_model()
 
 if __name__ == '__main__':
     main()
