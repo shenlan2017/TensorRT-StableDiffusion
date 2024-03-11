@@ -124,6 +124,7 @@ class Engine():
         print("engin nOutput: ", nOutput, ", Outpu shape: ", ouput_infor)
 
     def infer(self, feed_dict, stream=None, use_cuda_graph=False):
+        # import pdb; pdb.set_trace()
         for name, buf in feed_dict.items():
             self.tensors[name].copy_(buf)
 

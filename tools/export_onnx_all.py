@@ -185,7 +185,7 @@ def export_controlled_unet_model():
         opset_version=18,
         do_constant_folding=True,
         input_names=input_names,
-        # output_names=output_names,
+        output_names=output_names,
     )
 
     # verify onnx model
