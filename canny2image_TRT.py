@@ -24,7 +24,7 @@ class hackathon():
         self.use_trt = True
         # if not self.use_trt:
         if 1:
-            self.model.load_state_dict(load_state_dict('/home/player/ControlNet/models/control_sd15_canny.pth', location='cuda'))
+            self.model.load_state_dict(load_state_dict('./models/control_sd15_canny.pth', location='cuda'))
             self.model = self.model.cuda()
 
 
@@ -32,7 +32,7 @@ class hackathon():
         self.warm_up()
     def warm_up(self):
         for i in range(2):
-            path = "/home/player/pictures_croped/bird_"+ str(i) + ".jpg"
+            path = "./pictures_croped/bird_"+ str(i) + ".jpg"
             img = cv2.imread(path)
             new_img = self.process(img,
             "a bird",
