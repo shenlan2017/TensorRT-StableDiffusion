@@ -143,5 +143,6 @@ dmypy.json
 .pyre/
 onnx/*
 engine/*
+models
 *.log
 /*.jpg
