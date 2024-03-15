@@ -1,3 +1,5 @@
+import os
+
 import torch
 import torch.nn as nn
 from torch.utils.checkpoint import checkpoint
@@ -59,8 +61,8 @@ class FrozenT5Embedder(AbstractEncoder):
     """Uses the T5 transformer encoder for text"""
     def __init__(self, version="google/t5-v1_1-large", device="cuda", max_length=77, freeze=True):  # others are google/t5-v1_1-xl and google/t5-v1_1-xxl
         super().__init__()
-        self.tokenizer = T5Tokenizer.from_pretrained(version)
-        self.transformer = T5EncoderModel.from_pretrained(version)
+        self.tokenizer = T5Tokenizer.from_pretrained(version, cache_dir="./models")
+        self.transformer = T5EncoderModel.from_pretrained(version, cache_dir="./models")
         self.device = device
         self.max_length = max_length   # TODO: typical value?
         if freeze:
@@ -96,8 +98,12 @@ class FrozenCLIPEmbedder(AbstractEncoder):
                  freeze=True, layer="last", layer_idx=None):  # clip-vit-base-patch32
         super().__init__()
         assert layer in self.LAYERS
-        self.tokenizer = CLIPTokenizer.from_pretrained(version)
-        self.transformer = CLIPTextModel.from_pretrained(version)
+        self.tokenizer = CLIPTokenizer.from_pretrained(version, cache_dir=os.getcwd() + "/models")
+        self.transformer = CLIPTextModel.from_pretrained(version, cache_dir=os.getcwd() + "/models")
+
+        # self.tokenizer.save_pretrained("/data1/wgyang/play/shenlan/CNSD/ControlNet_bk/models")
+        # self.transformer.save_pretrained("/data1/wgyang/play/shenlan/CNSD/ControlNet_bk/models")
+
         self.device = device
         self.max_length = max_length
         if freeze:
@@ -119,6 +125,13 @@ class FrozenCLIPEmbedder(AbstractEncoder):
                                         return_overflowing_tokens=False, padding="max_length", return_tensors="pt")
         tokens = batch_encoding["input_ids"].to(self.device)
         outputs = self.transformer(input_ids=tokens, output_hidden_states=self.layer=="hidden")
+
+        if 0:
+            self.transformer.half()
+            import pdb; pdb.set_trace()
+            out = self.transformer(tokens)
+            print(out)
+
         if self.layer == "last":
             z = outputs.last_hidden_state
         elif self.layer == "pooled":

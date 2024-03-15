@@ -30,6 +30,7 @@ def onnx2trt(onnxFile, plan_name, min_shapes, opt_shapes, max_shapes, max_worksp
 
     if use_fp16:
         config.set_flag(trt.BuilderFlag.FP16)
+        plan_name = plan_name.replace(".plan", "_fp16.plan")
 
     if builder_opt_evel:
         config.builder_optimization_level = builder_opt_evel
