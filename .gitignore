@@ -146,3 +146,6 @@ engine/*
 models
 *.log
 /*.jpg
+histogram/
+*.cache
+smoothquant/

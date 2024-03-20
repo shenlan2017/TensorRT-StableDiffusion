@@ -45,6 +45,9 @@ class DDIMSampler(object):
         self.cuda_graph_instance = None
         self.stream1 = cuda.Stream()
         self.stream2 = cuda.Stream()
+
+        self.calib_data_idx = 0
+
     def register_buffer(self, name, attr):
         if type(attr) == torch.Tensor:
             if attr.device != torch.device("cuda"):
@@ -133,6 +136,14 @@ class DDIMSampler(object):
                 cond_txt = torch.cat(conditioning['c_crossattn'], 1)
                 #if self.cuda_graph_instance is None:
                    #cudart.cudaStreamBeginCapture(self.stream1.ptr, cudart.cudaStreamCaptureMode.cudaStreamCaptureModeGlobal)
+
+                if 1:
+                    x_noisy_arr = img.detach().cpu().numpy()
+                    hint_arr = hint.detach().cpu().numpy()
+                    timestep_arr = ts.detach().cpu().numpy()
+                    context_arr = cond_txt.detach().cpu().numpy()
+                    np.savez(f"calib_data/ControlNet/{self.calib_data_idx}", x_noisy=x_noisy_arr, hint=hint_arr, timestep=timestep_arr, context=context_arr)
+                    self.calib_data_idx = self.calib_data_idx + 1
 
                 torch.cuda.synchronize()
                 start_time = time.time()
