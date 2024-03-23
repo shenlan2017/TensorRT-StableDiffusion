@@ -24,6 +24,8 @@ import onnx_graphsurgeon as gs
 import onnx
 import onnxruntime as rt
 
+import surgeon_graph
+
 def optimize(onnx_path, opt_onnx_path):
     from onnxsim import simplify
     model = onnx.load(onnx_path)
@@ -74,17 +76,12 @@ def export_clip_model():
         outputs = self.transformer(
             input_ids=tokens, output_hidden_states=self.layer == "hidden"
         )
-        if self.layer == "last":
-            z = outputs.last_hidden_state
-        elif self.layer == "pooled":
-            z = outputs.pooler_output[:, None, :]
-        else:
-            z = outputs.hidden_states[self.layer_idx]
-        return z
+        return outputs.last_hidden_state
 
     clip_model.forward = types.MethodType(forward, clip_model)
 
-    onnx_path = "./onnx/CLIP.onnx"
+    onnx_path = "./onnx/CLI_ori.onnx"
+    opt_onnx_path = "./onnx/CLIP.onnx"
 
     tokens = torch.zeros(1, 77, dtype=torch.int32)
     input_names = ["input_ids"]
@@ -100,6 +97,8 @@ def export_clip_model():
         input_names=input_names,
         output_names=output_names,
     )
+
+    surgeon_graph.clip_rm_inf_and_change_inout_type(onnx_path, opt_onnx_path)
     print("======================= CLIP model export onnx done!")
 
     # verify onnx model
@@ -223,6 +222,7 @@ def export_decoder_model():
         opset_version=18,
         do_constant_folding=True,
         input_names=input_names,
+        output_names=output_names,
         keep_initializers_as_inputs=True
     )
 
@@ -231,9 +231,9 @@ def export_decoder_model():
 
 def main():
     export_clip_model()
-    export_control_net_model()
-    export_controlled_unet_model()
-    export_decoder_model()
+    # export_control_net_model()
+    # export_controlled_unet_model()
+    # export_decoder_model()
 
 if __name__ == '__main__':
     main()

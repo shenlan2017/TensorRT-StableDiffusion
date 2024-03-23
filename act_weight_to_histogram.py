@@ -44,22 +44,20 @@ def control_net_weighs2histogram(control_net):
     save_folder = 'histogram/weights'
     os.makedirs(save_folder, exist_ok=True)
 
-    # 获取模型的state_dict
-    state_dict = control_net.state_dict()
-
     # 遍历state_dict并绘制权重的直方图并保存
-    for key, value in state_dict.items():
-        if 'weight' in key:  # 只选择包含'weight'的键
-            weights = value.flatten().cpu().numpy()
+    for name, m in control_net.named_modules():
+        if isinstance(m, nn.Linear) or isinstance(m, nn.Conv2d):
+            # import pdb; pdb.set_trace()
+            weights = m.weight.flatten().detach().cpu().numpy()
 
             # 绘制权重的直方图
             plt.hist(weights, bins=50)
             plt.xlabel('Weight Value')
             plt.ylabel('Frequency')
-            plt.title(f'Histogram of {key} Weights')
+            plt.title(f'Histogram of {name} Weights')
 
             # 保存直方图为图像文件
-            save_path = os.path.join(save_folder, f'{key}_histogram.png')
+            save_path = os.path.join(save_folder, f'{name}.png')
             plt.savefig(save_path)
             plt.close()  # 关闭当前图形，以便绘制下一个直方图
 
@@ -87,7 +85,7 @@ def control_net_acts2histogram(control_net, input_path):
 
     hooks = []
     for name, m in control_net.named_modules():
-        if isinstance(m, nn.Linear):
+        if isinstance(m, nn.Linear) or isinstance(m, nn.Conv2d):
             hooks.append(
                 m.register_forward_hook(functools.partial(stat_input_hook, name=name))
             )
@@ -107,6 +105,7 @@ def main():
     control_net = hk.model.control_model.cpu()
     control_net.eval()
 
+    control_net_weighs2histogram(control_net)
     control_net_acts2histogram(control_net, "./calib_data/ControlNet/0.npz")
 
 if __name__ == '__main__':

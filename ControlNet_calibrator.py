@@ -133,8 +133,11 @@ def onnx2trt(onnxFile, plan_name, min_shapes, opt_shapes, max_shapes,
         plan_name = plan_name.replace(".plan", "_int8.plan")
         config.int8_calibrator = EntropyCalibrator2(int8_calib_data_path)
 
+    builder_opt_evel = 0
     if builder_opt_evel:
         config.builder_optimization_level = builder_opt_evel
+
+    config.set_flag(trt.BuilderFlag.OBEY_PRECISION_CONSTRAINTS)
 
     # set profile
     assert network.num_inputs == len(min_shapes)
@@ -145,6 +148,25 @@ def onnx2trt(onnxFile, plan_name, min_shapes, opt_shapes, max_shapes,
     for i in range(network.num_inputs):
         input_tensor = network.get_input(i)
         profile.set_shape(input_tensor.name, tuple(min_shapes[i]), tuple(opt_shapes[i]), tuple(max_shapes[i]))
+
+    for i in range(network.num_layers):
+        layer = network.get_layer(i)
+        layer_name = layer.name
+        layer_type = layer.type
+        # print(f"Layer Name: {layer_name}, Layer Type: {layer_type}")
+        if layer_type == trt.LayerType.MATRIX_MULTIPLY or layer_type == trt.LayerType.CONVOLUTION:
+            if "emb_layers" in layer_name or \
+               "attn2/to_k" in layer_name or \
+               "attn2/to_v" in layer_name or \
+               "attn2/to_out" in layer_name or \
+               "time_embed" in layer_name or \
+               "in_layers" in layer_name or \
+               "out_layers" in layer_name or \
+               "ff/net/net.2" in layer_name:
+                layer.set_output_type(0, trt.float16)
+                print(f"Layer Name: {layer_name}, Layer Type: {layer_type}")
+
+    # import pdb; pdb.set_trace()
 
     config.add_optimization_profile(profile)
 

@@ -137,7 +137,7 @@ class DDIMSampler(object):
                 #if self.cuda_graph_instance is None:
                    #cudart.cudaStreamBeginCapture(self.stream1.ptr, cudart.cudaStreamCaptureMode.cudaStreamCaptureModeGlobal)
 
-                if 1:
+                if 0:
                     x_noisy_arr = img.detach().cpu().numpy()
                     hint_arr = hint.detach().cpu().numpy()
                     timestep_arr = ts.detach().cpu().numpy()
