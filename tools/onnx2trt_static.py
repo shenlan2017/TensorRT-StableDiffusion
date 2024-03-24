@@ -2,7 +2,8 @@ import numpy as np
 import os
 import tensorrt as trt
 
-def onnx2trt(onnxFile, plan_name, min_shapes, opt_shapes, max_shapes, max_workspace_size = None, use_fp16=False, builder_opt_evel=None):
+def onnx2trt(onnxFile, plan_name, min_shapes, opt_shapes, max_shapes,
+             max_workspace_size = None, use_fp16=False, builder_opt_evel=None):
     logger = trt.Logger(trt.Logger.VERBOSE)
 
     builder = trt.Builder(logger)
@@ -112,7 +113,7 @@ def export_decoder_model(onnx_path, plan_path, batch=1, use_fp16=False):
 
     print("======================= Decoder  onnx2trt done!")
 
-def onnx2trt(use_fp16):
+def onnxs2trts(use_fp16):
     onnx_path = "./onnx/CLIP.onnx"
     plan_path = "./engine/CLIP.plan"
     export_clip_model(onnx_path, plan_path, use_fp16=use_fp16)
@@ -129,7 +130,7 @@ def onnx2trt(use_fp16):
     plan_path = "./engine/Decoder.plan"
     export_decoder_model(onnx_path, plan_path, use_fp16=use_fp16)
 
-def onnx2trt_opt(use_fp16):
+def onnxs2trts_opt(use_fp16):
     onnx_path = "./onnx/CLIP_opt.onnx"
     plan_path = "./engine/CLIP_opt.plan"
     export_clip_model(onnx_path, plan_path, use_fp16=use_fp16)
@@ -146,7 +147,7 @@ def onnx2trt_opt(use_fp16):
     plan_path = "./engine/Decoder_opt.plan"
     export_decoder_model(onnx_path, plan_path, use_fp16=use_fp16)
 
-def onnx2trt_opt_batch(use_fp16):
+def onnxs2trts_opt_batch(use_fp16):
     onnx_path = "./onnx/CLIP_opt.onnx"
     plan_path = "./engine/CLIP_opt_batch2.plan"
     export_clip_model(onnx_path, plan_path, batch=2, use_fp16=use_fp16)
@@ -160,7 +161,7 @@ def onnx2trt_opt_batch(use_fp16):
     export_controlled_unet_model(onnx_path, plan_path, batch=2, use_fp16=use_fp16)
 
 if __name__ == '__main__':
-    onnx2trt(use_fp16=False)
-    onnx2trt(use_fp16=True)
-    onnx2trt_opt(use_fp16=True)
-    onnx2trt_opt_batch(use_fp16=True)
+    onnxs2trts(use_fp16=False)
+    onnxs2trts(use_fp16=True)
+    onnxs2trts_opt(use_fp16=True)
+    onnxs2trts_opt_batch(use_fp16=True)
