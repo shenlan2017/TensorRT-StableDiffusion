@@ -62,35 +62,24 @@ def onnx2trt(onnxFile, plan_name, min_shapes, opt_shapes, max_shapes, max_worksp
     with open(plan_name, "wb") as fout:
         fout.write(serialized_engine)
 
-def export_clip_model():
-    onnx_path = "./onnx/CLIP.onnx"
-    plan_path = "./engine/CLIP.plan"
+def export_clip_model(onnx_path, plan_path, batch=1, use_fp16=False):
 
-    # onnx2trt(onnx_path, plan_path, [(1, 77)], [(1, 77)], [(1, 77)])
-    onnx2trt(onnx_path, plan_path, [(1, 77)], [(1, 77)], [(1, 77)], use_fp16=False)
+    onnx2trt(onnx_path, plan_path, [(batch, 77)], [(batch, 77)], [(batch, 77)], use_fp16=use_fp16)
     print("======================= CLIP onnx2trt done!")
 
-def export_control_net_model():
+def export_control_net_model(onnx_path, plan_path, batch=1, use_fp16=False):
     def get_shapes(B, S):
         return [(B, 4, 32, 48), (B, 3, 256, 384), tuple([B]), (B, S, 768)]
 
-    onnx_path = "./onnx/ControlNet.onnx"
-    plan_path = "./engine/ControlNet.plan"
-
-    # onnx2trt(onnx_path, plan_path,
-             # get_shapes(1, 77),
-             # get_shapes(1, 77),
-             # get_shapes(1, 77))
-
     onnx2trt(onnx_path, plan_path,
-             get_shapes(1, 77),
-             get_shapes(1, 77),
-             get_shapes(1, 77),
-             use_fp16=True)
+             get_shapes(batch, 77),
+             get_shapes(batch, 77),
+             get_shapes(batch, 77),
+             use_fp16=use_fp16)
 
     print("======================= ControlNet onnx2trt done!")
 
-def export_controlled_unet_model():
+def export_controlled_unet_model(onnx_path, plan_path, batch=1, use_fp16=False):
     def get_shapes(B, S):
         return [(B, 4, 32, 48), tuple([B]), (B, S, 768),
                 (B, 320, 32, 48),
@@ -107,42 +96,71 @@ def export_controlled_unet_model():
                 (B, 1280, 4, 6),
                 (B, 1280, 4, 6)]
 
-    onnx_path = "./onnx/ControlledUnet"
-    onnx_path = onnx_path + "/ControlledUnet.onnx"
-
-    plan_path = "./engine/ControlledUnet.plan"
-
-    # onnx2trt(onnx_path, plan_path,
-             # get_shapes(1, 77),
-             # get_shapes(1, 77),
-             # get_shapes(1, 77))
-
     onnx2trt(onnx_path, plan_path,
-             get_shapes(1, 77),
-             get_shapes(1, 77),
-             get_shapes(1, 77),
-             use_fp16=True)
+             get_shapes(batch, 77),
+             get_shapes(batch, 77),
+             get_shapes(batch, 77),
+             use_fp16=use_fp16)
 
     print("======================= ControlNet onnx2trt done!")
 
-def export_decoder_model():
-    onnx_path = "./onnx/Decoder.onnx"
-    plan_path = "./engine/Decoder.plan"
-
-    # onnx2trt(onnx_path, plan_path,
-            # [(1, 4, 32, 48)], [(1, 4, 32, 48)], [(1, 4, 32, 48)])
+def export_decoder_model(onnx_path, plan_path, batch=1, use_fp16=False):
 
     onnx2trt(onnx_path, plan_path,
-            [(1, 4, 32, 48)], [(1, 4, 32, 48)], [(1, 4, 32, 48)],
-             use_fp16=True)
+            [(batch, 4, 32, 48)], [(batch, 4, 32, 48)], [(batch, 4, 32, 48)],
+             use_fp16=use_fp16)
 
     print("======================= Decoder  onnx2trt done!")
 
-def main():
-    export_clip_model()
-    # export_control_net_model()
-    # export_controlled_unet_model()
-    # export_decoder_model()
+def onnx2trt(use_fp16):
+    onnx_path = "./onnx/CLIP.onnx"
+    plan_path = "./engine/CLIP.plan"
+    export_clip_model(onnx_path, plan_path, use_fp16=use_fp16)
+
+    onnx_path = "./onnx/ControlNet.onnx"
+    plan_path = "./engine/ControlNet.plan"
+    export_control_net_model(onnx_path, plan_path, use_fp16=use_fp16)
+
+    onnx_path = "./onnx/ControlledUnet/ControlledUnet.onnx"
+    plan_path = "./engine/ControlledUnet.plan"
+    export_controlled_unet_model(onnx_path, plan_path, use_fp16=use_fp16)
+
+    onnx_path = "./onnx/Decoder.onnx"
+    plan_path = "./engine/Decoder.plan"
+    export_decoder_model(onnx_path, plan_path, use_fp16=use_fp16)
+
+def onnx2trt_opt(use_fp16):
+    onnx_path = "./onnx/CLIP_opt.onnx"
+    plan_path = "./engine/CLIP_opt.plan"
+    export_clip_model(onnx_path, plan_path, use_fp16=use_fp16)
+
+    onnx_path = "./onnx/ControlNet_opt.onnx"
+    plan_path = "./engine/ControlNet_opt.plan"
+    export_control_net_model(onnx_path, plan_path, use_fp16=use_fp16)
+
+    onnx_path = "./onnx/ControlledUnet/ControlledUnet_opt.onnx"
+    plan_path = "./engine/ControlledUnet_opt.plan"
+    export_controlled_unet_model(onnx_path, plan_path, use_fp16=use_fp16)
+
+    onnx_path = "./onnx/Decoder_opt.onnx"
+    plan_path = "./engine/Decoder_opt.plan"
+    export_decoder_model(onnx_path, plan_path, use_fp16=use_fp16)
+
+def onnx2trt_opt_batch(use_fp16):
+    onnx_path = "./onnx/CLIP_opt.onnx"
+    plan_path = "./engine/CLIP_opt_batch2.plan"
+    export_clip_model(onnx_path, plan_path, batch=2, use_fp16=use_fp16)
+
+    onnx_path = "./onnx/ControlNet_opt.onnx"
+    plan_path = "./engine/ControlNet_opt_batch2.plan"
+    export_control_net_model(onnx_path, plan_path, batch=2, use_fp16=use_fp16)
+
+    onnx_path = "./onnx/ControlledUnet/ControlledUnet_opt.onnx"
+    plan_path = "./engine/ControlledUnet_opt_batch2.plan"
+    export_controlled_unet_model(onnx_path, plan_path, batch=2, use_fp16=use_fp16)
 
 if __name__ == '__main__':
-    main()
+    onnx2trt(use_fp16=False)
+    onnx2trt(use_fp16=True)
+    onnx2trt_opt(use_fp16=True)
+    onnx2trt_opt_batch(use_fp16=True)
