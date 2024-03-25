@@ -116,7 +116,7 @@ def export_control_net_model():
 
     x_noisy = torch.randn(2, 4, 32, 48, dtype=torch.float32)
     hint = torch.randn(2, 3, 256, 384, dtype=torch.float32)
-    timestep = torch.tensor([2], dtype=torch.int32)
+    timestep = torch.tensor([1, 2], dtype=torch.int32)
     context = torch.randn(2, 77, 768, dtype=torch.float32)
 
     input_names = ["x_noisy", "hint", "timestep", "context"]
@@ -208,7 +208,7 @@ def export_controlled_unet_model():
 def main():
     # export_clip_model()
     export_control_net_model()
-    export_controlled_unet_model()
+    # export_controlled_unet_model()
 
 if __name__ == '__main__':
     main()

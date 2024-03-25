@@ -80,7 +80,7 @@ def export_control_net_model(onnx_path, plan_path, batch=1, use_fp16=False):
     def get_shapes(B, S):
         return [(B, 4, 32, 48), (B, 3, 256, 384), tuple([B]), (B, S, 768)]
 
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     onnx2trt(onnx_path, plan_path,
              get_shapes(batch, 77),
              get_shapes(batch, 77),
