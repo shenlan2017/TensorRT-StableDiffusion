@@ -162,11 +162,11 @@ def onnxs2trts_opt_batch(use_fp16):
     # plan_path = "./engine/CLIP_opt_batch.plan"
     # export_clip_model(onnx_path, plan_path, batch=2, use_fp16=use_fp16)
 
-    onnx_path = "./onnx/ControlNet_opt_batch.onnx"
-    plan_path = "./engine/ControlNet_opt_batch.plan"
-    export_control_net_model(onnx_path, plan_path, batch=2, use_fp16=use_fp16)
+    # onnx_path = "./onnx/ControlNet_opt_batch.onnx"
+    # plan_path = "./engine/ControlNet_opt_batch.plan"
+    # export_control_net_model(onnx_path, plan_path, batch=2, use_fp16=use_fp16)
 
-    onnx_path = "./onnx/ControlledUnet/ControlledUnet_opt_batch.onnx"
+    onnx_path = "./onnx/ControlledUnet_opt_batch/ControlledUnet_opt_batch.onnx"
     plan_path = "./engine/ControlledUnet_opt_batch.plan"
     export_controlled_unet_model(onnx_path, plan_path, batch=2, use_fp16=use_fp16)
 
