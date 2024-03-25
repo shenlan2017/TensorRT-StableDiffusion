@@ -206,9 +206,9 @@ def export_controlled_unet_model():
     onnxruntime_check(onnx_path, input_dicts, [output])
 
 def main():
-    # export_clip_model()
+    export_clip_model()
     export_control_net_model()
-    # export_controlled_unet_model()
+    export_controlled_unet_model()
 
 if __name__ == '__main__':
     main()

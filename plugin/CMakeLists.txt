@@ -8,7 +8,7 @@ if(EXISTS "/home/player/TensorRT-8.6.1.6")
     set(TRT_LIB_DIR ${TRT_ROOT_DIR}/lib)
 else()
     set(TRT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
-    set(TRT_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+    set(TRT_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs)
 endif()
 
 add_definitions(-DENABLE_SM75)
