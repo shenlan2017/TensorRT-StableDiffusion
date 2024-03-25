@@ -4,12 +4,12 @@ import onnx
 import onnx_graphsurgeon as gs
 import polygraphy.backend.onnx.loader
 
-def clip_rm_inf_and_change_inout_type(src_onnx, dst_onnx):
+def clip_rm_inf_and_change_inout_type(src_onnx, dst_onnx, batch=1):
     graph = gs.import_onnx(onnx.load(src_onnx))
     change_inout_type(graph)
     for node in graph.nodes:
         if node.name == "/transformer/text_model/Trilu":
-            fp16_inf = gs.Constant("fp16_inf", np.ones((1, 77, 77), dtype= np.float16) * -10000)
+            fp16_inf = gs.Constant("fp16_inf", np.ones((batch, 77, 77), dtype= np.float16) * -10000)
             node.inputs[0] = fp16_inf
 
     graph.cleanup()

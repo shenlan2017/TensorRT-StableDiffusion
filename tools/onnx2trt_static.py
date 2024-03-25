@@ -1,6 +1,14 @@
 import numpy as np
 import os
+import ctypes
+
 import tensorrt as trt
+
+trt_plugin = "plugin/build/libplugin.so"
+handle = ctypes.CDLL(trt_plugin, mode=ctypes.RTLD_GLOBAL)
+if not handle:
+    raise RuntimeError("Could not load plugin library. Is " + trt_plugin + " on your LD_LIBRARY_PATH?")
+
 
 def onnx2trt(onnxFile, plan_name, min_shapes, opt_shapes, max_shapes,
              max_workspace_size = None, use_fp16=False, builder_opt_evel=None):
@@ -72,6 +80,7 @@ def export_control_net_model(onnx_path, plan_path, batch=1, use_fp16=False):
     def get_shapes(B, S):
         return [(B, 4, 32, 48), (B, 3, 256, 384), tuple([B]), (B, S, 768)]
 
+    import pdb; pdb.set_trace()
     onnx2trt(onnx_path, plan_path,
              get_shapes(batch, 77),
              get_shapes(batch, 77),
@@ -131,6 +140,7 @@ def onnxs2trts(use_fp16):
     export_decoder_model(onnx_path, plan_path, use_fp16=use_fp16)
 
 def onnxs2trts_opt(use_fp16):
+
     onnx_path = "./onnx/CLIP_opt.onnx"
     plan_path = "./engine/CLIP_opt.plan"
     export_clip_model(onnx_path, plan_path, use_fp16=use_fp16)
@@ -139,7 +149,7 @@ def onnxs2trts_opt(use_fp16):
     plan_path = "./engine/ControlNet_opt.plan"
     export_control_net_model(onnx_path, plan_path, use_fp16=use_fp16)
 
-    onnx_path = "./onnx/ControlledUnet/ControlledUnet_opt.onnx"
+    onnx_path = "./onnx/ControlledUnet_opt/ControlledUnet_opt.onnx"
     plan_path = "./engine/ControlledUnet_opt.plan"
     export_controlled_unet_model(onnx_path, plan_path, use_fp16=use_fp16)
 
@@ -148,20 +158,20 @@ def onnxs2trts_opt(use_fp16):
     export_decoder_model(onnx_path, plan_path, use_fp16=use_fp16)
 
 def onnxs2trts_opt_batch(use_fp16):
-    onnx_path = "./onnx/CLIP_opt.onnx"
-    plan_path = "./engine/CLIP_opt_batch2.plan"
-    export_clip_model(onnx_path, plan_path, batch=2, use_fp16=use_fp16)
+    # onnx_path = "./onnx/CLIP_opt_batch.onnx"
+    # plan_path = "./engine/CLIP_opt_batch.plan"
+    # export_clip_model(onnx_path, plan_path, batch=2, use_fp16=use_fp16)
 
-    onnx_path = "./onnx/ControlNet_opt.onnx"
-    plan_path = "./engine/ControlNet_opt_batch2.plan"
+    onnx_path = "./onnx/ControlNet_opt_batch.onnx"
+    plan_path = "./engine/ControlNet_opt_batch.plan"
     export_control_net_model(onnx_path, plan_path, batch=2, use_fp16=use_fp16)
 
-    onnx_path = "./onnx/ControlledUnet/ControlledUnet_opt.onnx"
-    plan_path = "./engine/ControlledUnet_opt_batch2.plan"
+    onnx_path = "./onnx/ControlledUnet/ControlledUnet_opt_batch.onnx"
+    plan_path = "./engine/ControlledUnet_opt_batch.plan"
     export_controlled_unet_model(onnx_path, plan_path, batch=2, use_fp16=use_fp16)
 
 if __name__ == '__main__':
-    onnxs2trts(use_fp16=False)
-    onnxs2trts(use_fp16=True)
-    onnxs2trts_opt(use_fp16=True)
+    # onnxs2trts(use_fp16=False)
+    # onnxs2trts(use_fp16=True)
+    # onnxs2trts_opt(use_fp16=True)
     onnxs2trts_opt_batch(use_fp16=True)

@@ -1,7 +1,15 @@
 cmake_minimum_required(VERSION 3.13)
 project(plugin C CXX)
 
-set(TRT_ROOT_DIR "/home/player/TensorRT-8.6.1.6")
+# 判断文件夹是否存在
+if(EXISTS "/home/player/TensorRT-8.6.1.6")
+    set(TRT_ROOT_DIR "/home/player/TensorRT-8.6.1.6")
+    set(TRT_INCLUDE_DIR ${TRT_ROOT_DIR}/include)
+    set(TRT_LIB_DIR ${TRT_ROOT_DIR}/lib)
+else()
+    set(TRT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    set(TRT_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+endif()
 
 add_definitions(-DENABLE_SM75)
 add_definitions(-DENABLE_SM80)
@@ -59,11 +67,11 @@ foreach(ext ${SRC_FILE_EXTENSIONS})
 endforeach()
 
 include_directories(${CUDA_INCLUDE_DIRS})
-include_directories(${TRT_ROOT_DIR}/include)
+include_directories(${TRT_INCLUDE_DIR})
 include_directories(${CMAKE_SOURCE_DIR})
 
 link_directories(${CUDA_TOOLKIT_ROOT_DIR}/lib64)
-link_directories(${TRT_ROOT_DIR}/lib)
+link_directories(${TRT_LIB_DIR})
 
 list(APPEND LINKER_LIBS nvinfer)
 list(APPEND LINKER_LIBS cudnn cublas cudart)
