@@ -149,7 +149,7 @@ def export_controlled_unet_model():
     controlled_unet_mdoel = hk.model.model.diffusion_model
 
     x_noisy = torch.randn(2, 4, 32, 48, dtype=torch.float32)
-    timestep = torch.tensor([2], dtype=torch.int32)
+    timestep = torch.tensor([1, 2], dtype=torch.int32)
     context = torch.randn(2, 77, 768, dtype=torch.float32)
 
     # control 为一个list 里面为tensor 13个

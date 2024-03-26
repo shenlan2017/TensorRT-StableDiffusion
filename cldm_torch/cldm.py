@@ -1,3 +1,5 @@
+import time
+
 import einops
 import torch
 import torch as th
@@ -334,9 +336,21 @@ class ControlLDM(LatentDiffusion):
         if cond['c_concat'] is None:
             eps = diffusion_model(x=x_noisy, timesteps=t, context=cond_txt, control=None, only_mid_control=self.only_mid_control)
         else:
+            torch.cuda.synchronize()
+            start_time = time.time()
             control = self.control_model(x=x_noisy, hint=torch.cat(cond['c_concat'], 1), timesteps=t, context=cond_txt)
+            torch.cuda.synchronize()
+            end_time = time.time()
+            print(f"control_model time={(end_time-start_time)*1000}ms")
+
             control = [c * scale for c, scale in zip(control, self.control_scales)]
+
+            torch.cuda.synchronize()
+            start_time = time.time()
             eps = diffusion_model(x=x_noisy, timesteps=t, context=cond_txt, control=control, only_mid_control=self.only_mid_control)
+            torch.cuda.synchronize()
+            end_time = time.time()
+            print(f"diffusion_model time={(end_time-start_time)*1000}ms")
 
         return eps
 

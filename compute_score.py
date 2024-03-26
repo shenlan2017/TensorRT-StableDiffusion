@@ -5,6 +5,13 @@ import cv2
 import datetime
 from canny2image_TRT import hackathon
 
+import ctypes
+
+trt_plugin = "plugin/build/libplugin.so"
+handle = ctypes.CDLL(trt_plugin, mode=ctypes.RTLD_GLOBAL)
+if not handle:
+    raise RuntimeError("Could not load plugin library. Is " + trt_plugin + " on your LD_LIBRARY_PATH?")
+
 block_idx = InceptionV3.BLOCK_INDEX_BY_DIM[2048]
 model = InceptionV3([block_idx]).to("cuda")
 

@@ -171,7 +171,7 @@ def onnxs2trts_opt_batch(use_fp16):
     export_controlled_unet_model(onnx_path, plan_path, batch=2, use_fp16=use_fp16)
 
 if __name__ == '__main__':
-    onnxs2trts(use_fp16=False)
+    # onnxs2trts(use_fp16=False)
     onnxs2trts(use_fp16=True)
     onnxs2trts_opt(use_fp16=True)
     onnxs2trts_opt_batch(use_fp16=True)

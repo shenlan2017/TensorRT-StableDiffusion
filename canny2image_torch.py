@@ -7,6 +7,7 @@ import gradio as gr
 import numpy as np
 import torch
 import random
+import time
 
 from pytorch_lightning import seed_everything
 from annotator.util import resize_image, HWC3
@@ -60,7 +61,12 @@ class hackathon():
             if config.save_memory:
                 self.model.low_vram_shift(is_diffusing=False)
 
+            torch.cuda.synchronize()
+            start_time = time.time()
             x_samples = self.model.decode_first_stage(samples)
+            torch.cuda.synchronize()
+            end_time = time.time()
+            print(f"decode_first_stage time={(end_time-start_time)*1000}ms")
             x_samples = (einops.rearrange(x_samples, 'b c h w -> b h w c') * 127.5 + 127.5).cpu().numpy().clip(0, 255).astype(np.uint8)
 
             results = [x_samples[i] for i in range(num_samples)]

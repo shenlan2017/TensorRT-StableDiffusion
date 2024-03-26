@@ -1,4 +1,5 @@
 import os
+import time
 
 import torch
 import torch.nn as nn
@@ -122,7 +123,13 @@ class FrozenCLIPEmbedder(AbstractEncoder):
         batch_encoding = self.tokenizer(text, truncation=True, max_length=self.max_length, return_length=True,
                                         return_overflowing_tokens=False, padding="max_length", return_tensors="pt")
         tokens = batch_encoding["input_ids"].to(self.device)
+
+        torch.cuda.synchronize()
+        start_time = time.time()
         outputs = self.transformer(input_ids=tokens, output_hidden_states=self.layer=="hidden")
+        torch.cuda.synchronize()
+        end_time = time.time()
+        print(f"CLIP transformer time={(end_time-start_time)*1000}ms")
 
         if 0:
             self.transformer.half()
@@ -136,7 +143,6 @@ class FrozenCLIPEmbedder(AbstractEncoder):
             z = outputs.pooler_output[:, None, :]
         else:
             z = outputs.hidden_states[self.layer_idx]
-        print(z)
         return z
 
     def encode(self, text):
